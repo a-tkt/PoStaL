@@ -1,0 +1,62 @@
+library(dplyr)
+library(tidyr)
+library(randomForest)
+library(pROC)
+library(RColorBrewer)
+##postal construction
+data=read.table("postal_features.txt",header=T)
+train=dplyr::filter(data,data$Train_test == "P1"|data$Train_test == "N1")
+test=dplyr::filter(data,data$Train_test == "P2"|data$Train_test == "N2")
+
+#excluded some cols
+train2=train %>% select(-one_of(c("Variant_ID","Train_test","SIFT_converted_rankscore","Polyphen2_HDIV_rankscore","Polyphen2_HVAR_rankscore","MutationTaster_converted_rankscore","PROVEAN_converted_rankscore","CADD_raw_rankscore","Eigen.PC.raw_rankscore","phyloP100way_vertebrate_rankscore","phyloP20way_mammalian_rankscore")))
+test2=test %>% select(-one_of(c("Variant_ID","Train_test","SIFT_converted_rankscore","Polyphen2_HDIV_rankscore","Polyphen2_HVAR_rankscore","MutationTaster_converted_rankscore","PROVEAN_converted_rankscore","CADD_raw_rankscore","Eigen.PC.raw_rankscore","phyloP100way_vertebrate_rankscore","phyloP20way_mammalian_rankscore")))
+
+#pathogenic variant count
+pn=count(train2,Label)$n[2]
+
+#model construction
+model<- randomForest(formula = Label ~ ., data = train2, importance = TRUE, ntree=1000, mtry=8, sampsize=c(pn,pn))
+#or model=readRDS("postal_model.obj")
+
+#plots
+plot(model)
+varImpPlot(model)
+
+##comparison with other tools
+#exclude "."
+a=droplevels(dplyr::filter(test,test$SIFT_converted_rankscore != "."))
+b=droplevels(dplyr::filter(test,test$Polyphen2_HDIV_rankscore != "."))
+c=droplevels(dplyr::filter(test,test$Polyphen2_HVAR_rankscore != "."))
+d=droplevels(dplyr::filter(test,test$MutationTaster_converted_rankscore != "."))
+e=droplevels(dplyr::filter(test,test$PROVEAN_converted_rankscore != "."))
+f=droplevels(dplyr::filter(test,test$CADD_raw_rankscore != "."))
+g=droplevels(dplyr::filter(test,test$Eigen.PC.raw_rankscore != "."))
+h=droplevels(dplyr::filter(test,test$phyloP100way_vertebrate_rankscore != "."))
+i=droplevels(dplyr::filter(test,test$phyloP20way_mammalian_rankscore != "."))
+
+#convert into numeric
+a$SIFT_converted_rankscore=as.numeric(as.character(a$SIFT_converted_rankscore))
+b$Polyphen2_HDIV_rankscore=as.numeric(as.character(b$Polyphen2_HDIV_rankscore))
+c$Polyphen2_HVAR_rankscore=as.numeric(as.character(c$Polyphen2_HVAR_rankscore))
+d$MutationTaster_converted_rankscore=as.numeric(as.character(d$MutationTaster_converted_rankscore))
+e$PROVEAN_converted_rankscore=as.numeric(as.character(e$PROVEAN_converted_rankscore))
+f$CADD_raw_rankscore=as.numeric(as.character(f$CADD_raw_rankscore))
+g$Eigen.PC.raw_rankscore=as.numeric(as.character(g$Eigen.PC.raw_rankscore))
+h$phyloP100way_vertebrate_rankscore=as.numeric(as.character(h$phyloP100way_vertebrate_rankscore))
+i$phyloP20way_mammalian_rankscore=as.numeric(as.character(i$phyloP20way_mammalian_rankscore))
+
+#fig
+predRawInput=predict(model,test,type="prob")
+pmerged=cbind(test,predRawInput)
+roc(pmerged$Label,pmerged$NP,plot=T,col="black",print.auc=T)
+roc(a$Label,a$SIFT_converted_rankscore,plot=T,col="#E41A1C",print.auc=T,add=T)
+roc(b$Label,b$Polyphen2_HDIV_rankscore,plot=T,col="#377EB8",print.auc=T,add=T)
+roc(c$Label,c$Polyphen2_HVAR_rankscore,plot=T,col="#4DAF4A",print.auc=T,add=T)
+roc(d$Label,d$MutationTaster_converted_rankscore,plot=T,col="#984EA3",print.auc=T,add=T)
+roc(e$Label,e$PROVEAN_converted_rankscore,plot=T,col="#FF7F00",print.auc=T,add=T)
+roc(f$Label,f$CADD_raw_rankscore,plot=T,col="#FFFF33",print.auc=T,add=T)
+roc(g$Label,g$Eigen.PC.raw_rankscore,plot=T,col="#A65628",print.auc=T,add=T)
+roc(h$Label,h$phyloP100way_vertebrate_rankscore,plot=T,col="#F781BF",print.auc=T,add=T)
+roc(i$Label,i$phyloP20way_mammalian_rankscore,plot=T,col="#999999",print.auc=T,add=T)
+
