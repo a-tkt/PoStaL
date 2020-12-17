@@ -4,9 +4,9 @@ PoStaL is a machine learning-based prediction tool for **P**athogenicity **o**f 
 This page provides;
 1. Full list of pathogenicity scores of any possible start-lost variants in canonical transcripts defined by SnpEff (postal_all.txt)
 2. Features used for model construction (postal_features.txt)
-3. R objects of the constructed models (postal_model.obj)
+3. R objects of the constructed model (postal_model.obj)
 4. R source code to reproduce the figures in our publication (postal_fig.txt)
-5. Full list of the length of amino acid residues by a stop-lost variant (stopAA.txt)
+5. Full list of the length of amino acid residues extended by a stop-lost variant (stopAA.txt)
 
 Email: atsushi.takata@riken.jp or atakata@yokohama-cu.ac.jp
 
