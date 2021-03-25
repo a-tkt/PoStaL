@@ -10,6 +10,6 @@ This page provides;
 
 Email: atsushi.takata@riken.jp or atakata@yokohama-cu.ac.jp
 
-Citation: Refinement of clinical variant interpretation framework by statistical evidence and machine learning  
+Citation: Refinement of the clinical variant interpretation framework by statistical evidence and machine learning  
 Atsushi Takata, Kohei Hamanaka and Naomichi Matsumoto  
-Med 2020
+Med 2021 DOI: https://doi.org/10.1016/j.medj.2021.02.003
